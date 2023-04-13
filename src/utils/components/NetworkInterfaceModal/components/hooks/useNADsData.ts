@@ -1,48 +1,29 @@
 import { useMemo } from 'react';
 
 import { NetworkAttachmentDefinitionModelGroupVersionKind } from '@kubevirt-ui/kubevirt-api/console';
-import {
-  DEFAULT_NAMESPACE,
-  OPENSHIFT_MULTUS_NS,
-  OPENSHIFT_SRIOV_NETWORK_OPERATOR_NS,
-} from '@kubevirt-utils/constants/constants';
+import useNADListPermissions from '@kubevirt-utils/components/NetworkInterfaceModal/components/hooks/useNADListPermissions';
+import { getExtraNADResources } from '@kubevirt-utils/components/NetworkInterfaceModal/components/hooks/utils';
 import { isEmpty } from '@kubevirt-utils/utils/utils';
 import { K8sResourceCommon, useK8sWatchResources } from '@openshift-console/dynamic-plugin-sdk';
 
-type UseNadsData = (namespace: string) => {
+type UseNADsData = (namespace: string) => {
   nads: K8sResourceCommon[];
   loaded: boolean;
   loadError: string;
 };
 
-const useNadsData: UseNadsData = (namespace) => {
+const useNADsData: UseNADsData = (namespace) => {
+  const nadListPermissionsMap = useNADListPermissions();
   const data = useK8sWatchResources<{ [key: string]: K8sResourceCommon[] }>({
     [namespace]: {
       groupVersionKind: NetworkAttachmentDefinitionModelGroupVersionKind,
       isList: true,
       namespace: namespace,
     },
-    //global ns to get usable nads
-    ...(namespace !== DEFAULT_NAMESPACE && {
-      default: {
-        groupVersionKind: NetworkAttachmentDefinitionModelGroupVersionKind,
-        isList: true,
-        namespace: DEFAULT_NAMESPACE,
-      },
-    }),
-    OPENSHIFT_SRIOV_NETWORK_OPERATOR_NS: {
-      groupVersionKind: NetworkAttachmentDefinitionModelGroupVersionKind,
-      isList: true,
-      namespace: OPENSHIFT_SRIOV_NETWORK_OPERATOR_NS,
-    },
-    OPENSHIFT_MULTUS_NS: {
-      groupVersionKind: NetworkAttachmentDefinitionModelGroupVersionKind,
-      isList: true,
-      namespace: OPENSHIFT_MULTUS_NS,
-    },
+    ...getExtraNADResources(namespace, nadListPermissionsMap),
   });
 
-  const accumulateData = useMemo(() => {
+  const accumulatedData = useMemo(() => {
     return (Object.values(data) || [])?.reduce(
       (acc, nads) => {
         acc.nads.push(...nads?.data);
@@ -54,7 +35,7 @@ const useNadsData: UseNadsData = (namespace) => {
     );
   }, [data]);
 
-  return accumulateData;
+  return accumulatedData;
 };
 
-export default useNadsData;
+export default useNADsData;
