@@ -36,7 +36,7 @@ import { DISABLED_GUEST_SYSTEM_LOGS_ACCESS } from '@kubevirt-utils/hooks/useFeat
 import { useFeatures } from '@kubevirt-utils/hooks/useFeatures/useFeatures';
 import useKubevirtUserSettings from '@kubevirt-utils/hooks/useKubevirtUserSettings/useKubevirtUserSettings';
 import { RHELAutomaticSubscriptionData } from '@kubevirt-utils/hooks/useRHELAutomaticSubscription/utils/types';
-import { createSecret } from '@kubevirt-utils/resources/secret/utils';
+import { createSecret, encodeSecretKey } from '@kubevirt-utils/resources/secret/utils';
 import { getAnnotation, getLabel, getResourceUrl } from '@kubevirt-utils/resources/shared';
 import {
   ANNOTATIONS,
@@ -289,6 +289,12 @@ const useCreateDrawerForm = (
           template,
           ANNOTATIONS.displayName,
         );
+
+        ensurePath(tabsDataDraft, 'disks.rootDiskRegistryCredentials');
+        tabsDataDraft.disks.rootDiskRegistryCredentials = {
+          password: encodeSecretKey(password),
+          username: encodeSecretKey(username),
+        };
       });
 
       updateTabsData((currentTabsData) => {
@@ -326,10 +332,12 @@ const useCreateDrawerForm = (
     );
   };
 
+  const credentialsValid = (username && password) || (!username && !password);
+
   return {
     createError,
     folder: getLabel(vm, VM_FOLDER_LABEL),
-    isCustomizeDisabled: !processedTemplateAccessReview || isCustomizing,
+    isCustomizeDisabled: !processedTemplateAccessReview || !credentialsValid || isCustomizing,
     isCustomizeLoading: isCustomizing || modelsLoading,
     isQuickCreateDisabled:
       !isBootSourceAvailable ||
@@ -338,7 +346,8 @@ const useCreateDrawerForm = (
       isEmpty(models) ||
       !allRequiredParametersAreFulfilled(template) ||
       !hasValidSource(template) ||
-      storageClassRequiredMissing,
+      storageClassRequiredMissing ||
+      !credentialsValid,
     isQuickCreateLoading: isQuickCreating || modelsLoading,
     nameField,
     onChangeFolder,

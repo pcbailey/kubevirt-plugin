@@ -1,3 +1,4 @@
+import { RegistryCredentials } from '@catalog/utils/useRegistryCredentials/utils/types';
 import { V1beta1DataVolume } from '@kubevirt-ui/kubevirt-api/containerized-data-importer/models';
 import { IoK8sApiCoreV1PersistentVolumeClaim } from '@kubevirt-ui/kubevirt-api/kubernetes';
 import {
@@ -58,6 +59,7 @@ export type V1DiskFormState = {
   disk: V1Disk;
   expandPVCSize?: string;
   isBootSource: boolean;
+  registryCredentials?: RegistryCredentials;
   storageClassProvisioner?: string;
   storageProfileSettingsApplied?: boolean;
   uploadFile?: { file: File; filename: string };

@@ -1,3 +1,4 @@
+import { RegistryCredentials } from '@catalog/utils/useRegistryCredentials/utils/types';
 import DataSourceModel from '@kubevirt-ui/kubevirt-api/console/models/DataSourceModel';
 import {
   V1DataVolumeTemplateSpec,
@@ -46,7 +47,11 @@ const createInitialStateFromSource: Record<
     (dataVolumeTemplate.spec.source.snapshot = { name: '', namespace: '' }),
 };
 
-export const getDefaultEditValues = (vm: V1VirtualMachine, editDiskName?: string) => {
+export const getDefaultEditValues = (
+  vm: V1VirtualMachine,
+  editDiskName?: string,
+  registryCredentials?: RegistryCredentials,
+) => {
   const isBootSource = getBootDisk(vm)?.name === editDiskName;
   let diskToEdit = getDisks(vm)?.find((disk) => disk.name === editDiskName);
   const volumeToEdit = getVolumes(vm)?.find((volume) => volume.name === editDiskName);
@@ -60,6 +65,7 @@ export const getDefaultEditValues = (vm: V1VirtualMachine, editDiskName?: string
     dataVolumeTemplate,
     disk: diskToEdit,
     isBootSource,
+    registryCredentials,
     volume: volumeToEdit,
   };
 };
