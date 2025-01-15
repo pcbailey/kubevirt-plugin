@@ -1,4 +1,3 @@
-import { RegistryCredentials } from '@catalog/utils/useRegistryCredentials/utils/types';
 import DataSourceModel from '@kubevirt-ui/kubevirt-api/console/models/DataSourceModel';
 import {
   V1DataVolumeTemplateSpec,
@@ -18,7 +17,7 @@ import { isRunning } from '@virtualmachines/utils';
 
 import { DEFAULT_DISK_SIZE } from './constants';
 import { doesSourceRequireDataVolume, getDefaultDiskType } from './helpers';
-import { SourceTypes, V1DiskFormState } from './types';
+import { DefaultFormValues, SourceTypes, V1DiskFormState } from './types';
 
 const getDefaultDataVolumeTemplate = (name: string): V1DataVolumeTemplateSpec => ({
   metadata: { name },
@@ -50,7 +49,7 @@ const createInitialStateFromSource: Record<
 export const getDefaultEditValues = (
   vm: V1VirtualMachine,
   editDiskName?: string,
-  registryCredentials?: RegistryCredentials,
+  defaultValues?: DefaultFormValues,
 ) => {
   const isBootSource = getBootDisk(vm)?.name === editDiskName;
   let diskToEdit = getDisks(vm)?.find((disk) => disk.name === editDiskName);
@@ -65,8 +64,8 @@ export const getDefaultEditValues = (
     dataVolumeTemplate,
     disk: diskToEdit,
     isBootSource,
-    registryCredentials,
     volume: volumeToEdit,
+    ...(defaultValues ? defaultValues : {}),
   };
 };
 

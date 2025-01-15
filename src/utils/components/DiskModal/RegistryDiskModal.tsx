@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import useRegistryCredentials from '@catalog/utils/useRegistryCredentials/useRegistryCredentials';
 import AdvancedSettings from '@kubevirt-utils/components/DiskModal/components/AdvancedSettings/AdvancedSettings';
 import BootSourceCheckbox from '@kubevirt-utils/components/DiskModal/components/BootSourceCheckbox/BootSourceCheckbox';
 import DiskInterfaceSelect from '@kubevirt-utils/components/DiskModal/components/DiskInterfaceSelect/DiskInterfaceSelect';
@@ -27,13 +26,12 @@ import { getDefaultCreateValues, getDefaultEditValues } from './utils/form';
 import { SourceTypes, V1DiskFormState, V1SubDiskModalProps } from './utils/types';
 
 const RegistryDiskModal: FC<V1SubDiskModalProps> = (props) => {
-  const { editDiskName, isCreated, isOpen, onClose, onSubmit, pvc, vm } = props;
-  const { decodedRegistryCredentials, updateRegistryCredentials } = useRegistryCredentials();
+  const { defaultFormValues, editDiskName, isCreated, isOpen, onClose, onSubmit, pvc, vm } = props;
 
   const isEditDisk = !isEmpty(editDiskName);
 
   const defaultValues = isEditDisk
-    ? getDefaultEditValues(vm, editDiskName, decodedRegistryCredentials)
+    ? getDefaultEditValues(vm, editDiskName, defaultFormValues)
     : getDefaultCreateValues(vm, SourceTypes.REGISTRY);
 
   const methods = useForm<V1DiskFormState>({
@@ -48,11 +46,10 @@ const RegistryDiskModal: FC<V1SubDiskModalProps> = (props) => {
   } = methods;
 
   const formRegistryCredentials = watch(REGISTRY_CREDENTIALS_FIELD);
-  const { password, username } = formRegistryCredentials;
+  const { password, username } = formRegistryCredentials || { password: '', username: '' };
   const credentialsValid = (username && password) || (!username && !password);
 
   const handleSubmitForm = () => {
-    updateRegistryCredentials(formRegistryCredentials);
     return handleSubmit(async (data) => submit({ data, editDiskName, onSubmit, pvc, vm }))();
   };
 

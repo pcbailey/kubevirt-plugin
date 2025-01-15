@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 
-import { WizardVMContextProvider } from '@catalog/utils/WizardVMContext';
 import { getName, getNamespace } from '@kubevirt-utils/resources/shared';
 import { getDataVolumeTemplates, getVolumes } from '@kubevirt-utils/resources/vm';
 import { isEmpty } from '@kubevirt-utils/utils/utils';
@@ -13,6 +12,7 @@ import { V1DiskModalProps } from './utils/types';
 const DiskModal: FC<V1DiskModalProps> = ({
   createDiskSource,
   createdPVCName,
+  defaultFormValues,
   editDiskName,
   isOpen,
   onClose,
@@ -33,19 +33,18 @@ const DiskModal: FC<V1DiskModalProps> = ({
   const Modal = modalsBySource[createDiskSource || editDiskSource];
 
   return (
-    <WizardVMContextProvider>
-      <Modal
-        createDiskSource={createDiskSource}
-        editDiskName={editDiskName}
-        isCreated={!isEmpty(createdPVCName)}
-        isOpen={isOpen}
-        onClose={onClose}
-        onSubmit={onSubmit}
-        onUploadedDataVolume={onUploadedDataVolume}
-        pvc={pvc}
-        vm={vm}
-      />
-    </WizardVMContextProvider>
+    <Modal
+      createDiskSource={createDiskSource}
+      defaultFormValues={defaultFormValues}
+      editDiskName={editDiskName}
+      isCreated={!isEmpty(createdPVCName)}
+      isOpen={isOpen}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      onUploadedDataVolume={onUploadedDataVolume}
+      pvc={pvc}
+      vm={vm}
+    />
   );
 };
 
